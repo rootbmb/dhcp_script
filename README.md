@@ -6,7 +6,7 @@ create_conf_dhcp.py Создает конфиг dhcp с opt82 для разны�
                 4. Select the config name  u10.10.conf
                 All arguments are mandatory and enter them through a space.
 
-                create_conf_dhcp.py 10 192.168.10.64/26 snr u10.10.conf ''')
+                create_conf_dhcp.py 10 192.168.10.64/26 snr u10.10.conf
   
   
   
