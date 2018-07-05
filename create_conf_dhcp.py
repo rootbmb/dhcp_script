@@ -5,20 +5,19 @@ import ipaddress
 from sys import argv
 
 
-def create_conf(vlan, subnet, switch_conf, file_name, relay):
+def create_conf(vlan, subnet, switch_conf, file_name, trigger):
+    '''Открываем файл для записи и записываем в файл данные'''
     with open(file_name, 'a') as file:
-        Port = 0
-        if relay == 1:
+        Port = 1
+        if trigger == 0:
+            '''пропускаем через цикл список ip аресов и присваеваем ip адрес порту Port '''
             for ip in subnet:
-                if Port == 0:
-                    Port += 1
-                    continue
-                elif Port <= 26:
+                if Port <= 26:
                     file.write(switch_conf.format(vlan, Port, str(ip)))
                 else:
                     break
                 Port += 1
-        elif relay == 2:
+        elif trigger == 1:
             ip_list = []
             for ip in subnet:
                 ip_list.append(ip)
@@ -26,9 +25,10 @@ def create_conf(vlan, subnet, switch_conf, file_name, relay):
 
 
 def main():
+    '''Получаем на вход параметры'''
     try:
         vlan, subnet, switch, file_name = argv[1:]
-    except:
+    except ValueError:
         pass
     if len(argv) < 3 or len(argv) > 5:
         print('''
@@ -43,19 +43,23 @@ def main():
                 create_conf_dhcp.py 10 192.168.10.64/26 snr u10.10.conf ''')
 
     else:
+        '''Преобразуем подсеть в список адресов'''
         subnet1 = ipaddress.ip_network(subnet)
         subnet = list(subnet1.hosts())
 
+        '''Конфиг dhcp с opt82 для разных ведеров'''
         Dlink = 'class "vlan{0}port-{1}"{{match if (binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2))="{0}" and binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 4, 2))="{1}")}}\npool {{range {2}; allow members of "vlan{0}port-{1}"}}\n'
         Snr = 'class "vlan{0}port-{1}"{{match if ( binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2)) = "{0}") and (binary-to-ascii(10,8,"",suffix(option agent.circuit-id,1)))= "{1}";}}\npool {{range {2}; allow members of "vlan{0}port-{1}";}}\n'
         dir100 = 'class "vlan{0}"{{match if ( binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2)) = "{0}"); }}\npool {{range {1} {2}; allow members of "vlan{0}"; }}\n'
 
+        trigger = [0, 1]
+
         if switch == 'snr':
-            create_conf(vlan, subnet, Snr, file_name, 1)
+            create_conf(vlan, subnet, Snr, file_name, trigger[0])
         elif switch == 'dlink':
-            create_conf(vlan, subnet, Dlink, file_name, 1)
+            create_conf(vlan, subnet, Dlink, file_name, trigger[0])
         elif switch == 'dir100':
-            create_conf(vlan, subnet, dir100, file_name, 2)
+            create_conf(vlan, subnet, dir100, file_name, trigger[1])
 
 
 if __name__ == '__main__':
