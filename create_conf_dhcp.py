@@ -5,14 +5,14 @@ import ipaddress
 from sys import argv
 
 
-def create_conf(vlan, subnet, switch_conf, file_name, trigger):
+def create_conf(vlan, subnet, switch_conf, file_name, trigger, len_port=26):
     '''Открываем файл для записи и записываем в файл данные'''
     with open(file_name, 'a') as file:
         Port = 1
         if trigger == 0:
             '''пропускаем через цикл список ip аресов и присваеваем ip адрес порту Port '''
             for ip in subnet:
-                if Port <= 26:
+                if Port <= int(len_port):
                     file.write(switch_conf.format(vlan, Port, str(ip)))
                 else:
                     break
@@ -26,11 +26,17 @@ def create_conf(vlan, subnet, switch_conf, file_name, trigger):
 
 def main():
     '''Получаем на вход параметры'''
-    try:
-        vlan, subnet, switch, file_name = argv[1:]
-    except ValueError:
-        pass
-    if len(argv) < 3 or len(argv) > 5:
+
+    list_argv = list(argv[1:])
+    list_param = ["vlan", "subnet", "switch", "file_name", "len_port"]
+    dict_out = dict(zip(list_param, list_argv))
+    vlan = dict_out.get('vlan')
+    subnet = dict_out.get('subnet')
+    switch = dict_out.get('switch')
+    file_name = dict_out.get('file_name')
+    len_port = dict_out.get('len_port')
+
+    if len(argv[1:]) < 4 or len(argv[1:]) > 5:
         print('''
         Enter arguments:
 
@@ -38,6 +44,7 @@ def main():
                 2. Used Network  192.168.10.64/26
                 3. Select switch from list [snr, dlink, dir100]
                 4. Select the config name  u10.10.conf
+                5. Number of ports (default 26)
                 All arguments are mandatory and enter them through a space.
 
                 create_conf_dhcp.py 10 192.168.10.64/26 snr u10.10.conf ''')
@@ -55,9 +62,17 @@ def main():
         trigger = [0, 1]
 
         if switch == 'snr':
-            create_conf(vlan, subnet, Snr, file_name, trigger[0])
+            if len_port != None and len_port.isdigit():
+
+                create_conf(vlan, subnet, Snr, file_name, trigger[0], len_port)
+            else:
+                create_conf(vlan, subnet, Snr, file_name, trigger[0])
         elif switch == 'dlink':
-            create_conf(vlan, subnet, Dlink, file_name, trigger[0])
+            if len_port != None and len_port.isdigit():
+                create_conf(vlan, subnet, Dlink, file_name,
+                            trigger[0], len_port)
+            else:
+                create_conf(vlan, subnet, Dlink, file_name, trigger[0])
         elif switch == 'dir100':
             create_conf(vlan, subnet, dir100, file_name, trigger[1])
 
