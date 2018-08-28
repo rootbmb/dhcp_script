@@ -53,9 +53,10 @@ def main():
         '''Преобразуем подсеть в список адресов'''
         subnet1 = ipaddress.ip_network(subnet)
         subnet = list(subnet1.hosts())
-
+        subnet = subnet[1:]
+        
         '''Конфиг dhcp с opt82 для разных ведеров'''
-        Dlink = 'class "vlan{0}port-{1}"{{match if (binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2))="{0}" and binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 4, 2))="{1}")}}\npool {{range {2}; allow members of "vlan{0}port-{1}"}}\n'
+        Dlink = 'class "vlan{0}port-{1}"{{match if (binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2))="{0}" and binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 4, 2))= "{1}");}}\npool {{range {2}; allow members of "vlan{0}port-{1}";}}\n'
         Snr = 'class "vlan{0}port-{1}"{{match if ( binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2)) = "{0}") and (binary-to-ascii(10,8,"",suffix(option agent.circuit-id,1)))= "{1}";}}\npool {{range {2}; allow members of "vlan{0}port-{1}";}}\n'
         dir100 = 'class "vlan{0}"{{match if ( binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2)) = "{0}"); }}\npool {{range {1} {2}; allow members of "vlan{0}"; }}\n'
 
