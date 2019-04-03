@@ -11,7 +11,7 @@ def create_conf(vlan, subnet, switch_conf, file_name, trigger, len_port=26):
         Port = 1
         if trigger == 0:
             '''пропускаем через цикл список ip аресов и присваеваем ip адрес порту Port '''
-            for ip in subnet:
+            for ip in subnet[1:]:
                 if Port <= int(len_port):
                     file.write(switch_conf.format(vlan, Port, str(ip)))
                 else:

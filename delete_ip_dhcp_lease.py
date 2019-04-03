@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from sys import argv
+import ipaddress
 
 
 def pars(ip, file):
@@ -24,10 +25,23 @@ def pars(ip, file):
 def main():
     src_1 = '/var/lib/dhcp/dhcpd.leases'
     src_2 = '/var/lib/dhcp/dhcpd.leases~'
-    ip = argv[1:]
-    if ip:
-        pars(''.join(ip), src_1)
-        pars(''.join(ip), src_2)
+    net = argv[1:]
+    if net:
+        ip = net[0]
+
+        if '/' in ip:
+            try:
+                subnet = ipaddress.ip_network(ip)
+                for ip in subnet.hosts():
+                    print('\n*****[{}]*****'.format(ip))
+                    pars(''.join(str(ip)), src_1)
+                    pars(''.join(str(ip)), src_2)
+            except ValueError:
+                print('Network not entered correctly')
+        else:
+            print('\n*****[{}]*****'.format(ip))
+            pars(''.join(ip), src_1)
+            pars(''.join(ip), src_2)
     else:
         print('Enter ip address: "delete_ip_dhcp_lease.py 192.168.80.10"')
 
