@@ -42,7 +42,7 @@ def main():
 
                 1. Vlan number  10
                 2. Used Network  192.168.10.64/26
-                3. Select switch from list [snr, dlink, dir100]
+                3. Select switch from list [snr, dlink, hp, qsw300, dir100]
                 4. Select the config name  u10.10.conf
                 5. Number of ports (default 26)
                 All arguments are mandatory and enter them through a space.
@@ -59,6 +59,8 @@ def main():
         Dlink = 'class "vlan{0}port-{1}"{{match if (binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2))="{0}" and binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 4, 2))= "{1}");}}\npool {{range {2}; allow members of "vlan{0}port-{1}";}}\n'
         Snr = 'class "vlan{0}port-{1}"{{match if ( binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2)) = "{0}") and (binary-to-ascii(10,8,"",suffix(option agent.circuit-id,1)))= "{1}";}}\npool {{range {2}; allow members of "vlan{0}port-{1}";}}\n'
         dir100 = 'class "vlan{0}"{{match if ( binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2)) = "{0}"); }}\npool {{range {1} {2}; allow members of "vlan{0}"; }}\n'
+        hp = 'class "vlan{0}port-{1}"{{match if ( binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 2, 2)) = "{0}") and (binary-to-ascii(10,8,"",suffix(option agent.circuit-id,1)))= "{1}";}}\npool {{range {2}; allow members of "vlan{0}port-{1}";}}\n'
+        qsw3000 = 'class "vlan{0}port-{1}"{{match if ( binary-to-ascii(10, 16, "",  substring(option agent.circuit-id, 0, 2)) = "{0}") and (binary-to-ascii(10,8,"",suffix(option agent.circuit-id,1)))= "{1}";}}\npool {{range {2}; allow members of "vlan{0}port-{1}";}}\n'
 
         trigger = [0, 1]
 
@@ -74,6 +76,17 @@ def main():
                             trigger[0], len_port)
             else:
                 create_conf(vlan, subnet, Dlink, file_name, trigger[0])
+        elif switch == 'hp':
+            if len_port != None and len_port.isdigit():
+                create_conf(vlan, subnet, hp, file_name,
+                            trigger[0], len_port,Port=0)
+            else:
+                create_conf(vlan, subnet, hp, file_name, trigger[0],Port=0)
+        elif switch == 'qsw3000':
+            if len_port != None and len_port.isdigit():
+                create_conf(vlan, subnet, qsw3000, file_name, trigger[0], len_port)
+            else:
+                create_conf(vlan, subnet, qsw3000, file_name, trigger[0])
         elif switch == 'dir100':
             create_conf(vlan, subnet, dir100, file_name, trigger[1])
 
